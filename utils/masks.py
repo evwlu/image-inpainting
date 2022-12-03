@@ -19,7 +19,7 @@ def initialize_masks(batch_size, image_size, window_size, hole_min, hole_max, nu
             mask[hole_x: (hole_x + hole_w), hole_y: (hole_y + hole_h)] = 1
 
             if (num_holes == 1):
-                locations += [hole_x, hole_y, hole_w, hole_h]
+                locations += [[hole_x, hole_y, hole_w, hole_h]]
             
         masks += [mask]
     

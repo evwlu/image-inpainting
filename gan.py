@@ -1,23 +1,95 @@
 import tensorflow as tf
 
 class LocalDiscriminator(tf.keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, shape=(32,32,3), **kwargs):
+        super.__init__(kwargs)
         # initialize layers
-        pass
+        # note: the shape for cifar-100 is (32,32,3); leave this parameter if changing the training data
+        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME', input_shape=shape)
+        self.bnorm1 = tf.keras.layers.BatchNormalization()
+        self.relu1 = tf.keras.layers.ReLU()
 
-    def call(self, window):
+        # 16 x 16
+        self.conv2 = tf.keras.layers.Conv2D(4, 5, strides=2, padding='SAME')
+        self.bnorm2 = tf.keras.layers.BatchNormalization()
+        self.relu2 = tf.keras.layers.ReLU()
+
+        # 8 x 8
+        self.conv3 = tf.keras.layers.Conv2D(8, 5, strides=2, padding='SAME')
+        self.bnorm3 = tf.keras.layers.BatchNormalization()
+        self.relu3 = tf.keras.layers.ReLU()
+
+        # 4 x 4
+        self.flatten = tf.keras.layers.Flatten()
+        self.linear = tf.keras.layers.Dense(1024, activation='relu')
+
+    def call(self, window, training=False):
         """
-        takes as input a window (completed or ground truth)
+        takes as input a window (completed or ground truth);
+        mask should be applied before
         """
-        pass
+        x = self.conv1(window)
+        x = self.bnorm1(x, training)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.bnorm2(x, training)
+        x = self.relu2(x)
+
+        x = self.conv3(x)
+        x = self.bnorm3(x, training)
+        x = self.relu3(x)
+
+        x = self.flatten(x)
+        return self.linear(x)
 
 class GlobalDiscriminator(tf.keras.layers.Layer):
-    def __init__(self, **kwargs):
-        # initialize layers
-        pass
+    def __init__(self, shape=(32,32,3), **kwargs):
+        super.__init__(kwargs)
 
-    def call(self, full_image):
+        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME', input_shape=shape)
+        self.bnorm1 = tf.keras.layers.BatchNormalization()
+        self.relu1 = tf.keras.layers.ReLU()
+
+        # 16 x 16
+        self.conv2 = tf.keras.layers.Conv2D(4, 5, strides=2, padding='SAME')
+        self.bnorm2 = tf.keras.layers.BatchNormalization()
+        self.relu2 = tf.keras.layers.ReLU()
+
+        # 8 x 8
+        self.conv3 = tf.keras.layers.Conv2D(8, 5, strides=2, padding='SAME')
+        self.bnorm3 = tf.keras.layers.BatchNormalization()
+        self.relu3 = tf.keras.layers.ReLU()
+
+        # 4 x 4
+        self.conv4 = tf.keras.layers.Conv2D(16, 5, strides=2, padding='SAME')
+        self.bnorm4 = tf.keras.layers.BatchNormalization()
+        self.relu4 = tf.keras.layers.ReLU()
+
+        # 2 x 2
+        self.flatten = tf.keras.layers.Flatten()
+        self.linear = tf.keras.layers.Dense(1024, activation='relu')
+
+    def call(self, full_image, training=False):
         """
-        takes as input the entire image (completed or ground truth)
+        takes as input the entire image (completed or ground truth);
+        mask should be applied before
         """
-        pass
+        x = self.conv1(full_image)
+        x = self.bnorm1(x, training)
+        x = self.relu1(x)
+
+        x = self.conv2(x)
+        x = self.bnorm2(x, training)
+        x = self.relu2(x)
+
+        x = self.conv3(x)
+        x = self.bnorm3(x, training)
+        x = self.relu3(x)
+
+        x = self.conv4(x)
+        x = self.bnorm4(x, training)
+        x = self.relu4(x)
+
+        x = self.flatten(x)
+        return self.linear(x)
