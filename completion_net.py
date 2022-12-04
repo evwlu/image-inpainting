@@ -58,21 +58,21 @@ class CompletionNetwork(tf.keras.layers.Layer):
 
         self.conv9 = tf.keras.layers.Conv2D(3, 3, strides=1, padding='SAME', activation='sigmoid')
 
-    def call(self, incomplete_images):
-        x = self.relu1(self.bnorm1(self.conv1(incomplete_images)))
-        x = self.relu2(self.bnorm2(self.conv2(x)))
-        x = self.relu3(self.bnorm3(self.conv3(x)))
-        x = self.relu4(self.bnorm4(self.conv4(x)))
-        x = self.relu5(self.bnorm5(self.conv5(x)))
+    def call(self, incomplete_images, training=False):
+        x = self.relu1(self.bnorm1(self.conv1(incomplete_images), training))
+        x = self.relu2(self.bnorm2(self.conv2(x), training))
+        x = self.relu3(self.bnorm3(self.conv3(x), training))
+        x = self.relu4(self.bnorm4(self.conv4(x), training))
+        x = self.relu5(self.bnorm5(self.conv5(x), training))
 
-        x = self.relu6(self.bnorm6(self.dil1(x)))
-        x = self.relu7(self.bnorm7(self.dil2(x)))
-        x = self.relu8(self.bnorm8(self.dil3(x)))
+        x = self.relu6(self.bnorm6(self.dil1(x), training))
+        x = self.relu7(self.bnorm7(self.dil2(x), training))
+        x = self.relu8(self.bnorm8(self.dil3(x), training))
 
-        x = self.relu9(self.bnorm9(self.conv6(x)))
-        x = self.relu10(self.bnorm10(self.conv_trans1(x)))
-        x = self.relu11(self.bnorm11(self.conv7(x)))
-        x = self.relu12(self.bnorm12(self.conv_trans2(x)))
-        x = self.relu13(self.bnorm13(self.conv8(x)))
+        x = self.relu9(self.bnorm9(self.conv6(x), training))
+        x = self.relu10(self.bnorm10(self.conv_trans1(x), training))
+        x = self.relu11(self.bnorm11(self.conv7(x), training))
+        x = self.relu12(self.bnorm12(self.conv_trans2(x), training))
+        x = self.relu13(self.bnorm13(self.conv8(x), training))
 
         return self.conv9(x)
