@@ -42,16 +42,16 @@ class ImageInpaint(tf.keras.Model):
         self.concat = tf.keras.layers.Concatenate()
         self.fc = tf.keras.layers.Dense(units=1, activation='sigmoid')
     
-    def compile(self, optimizer, loss, metrics):
+    def compile(self, optimizer, losses, metrics):
         """
         initialize optimizer (Adam), initialize loss functions for completion network (l2 loss),
         overall discriminator (binary cross-entropy), initialize acc metric (ie. dice coeff)
         """
         self.optimizer = optimizer
 
-        self.comp_loss = loss[0]
-        self.disc_loss = loss[1]
-        self.joint_loss = loss[2]
+        self.comp_loss = losses[0]
+        self.disc_loss = losses[1]
+        self.joint_loss = losses[2]
 
         self.acc = metrics[0]
 
