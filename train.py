@@ -18,7 +18,7 @@ def compile_model(model):
     from utils.losses import completion_loss, discriminator_loss, joint_loss
 
     optimizer = tf.keras.optimizers.Adam()
-    losses = [completion_loss, discriminator_loss, joint_loss]
+    losses = [tf.keras.losses.MeanSquaredError(reduction=tf.keras.losses.Reduction.SUM), discriminator_loss, joint_loss]
     acc = None # fill in later with dice coeff
 
     model.compile(
@@ -35,11 +35,11 @@ def load_model(checkpoint):
     model.train   = partial(ImageInpaint.train,   model)
     model.compile = partial(ImageInpaint.compile, model)
 
-def train(model, train_images):
+def train(model, train_images, batch_size, T_C, T_D, T):
 
     # note: apply data augmentation before training
     try:
-        model.train(train_images, 16, 1000, 600, 3600)
+        model.train(train_images, batch_size, T_C, T_D, T)
     except KeyboardInterrupt as e:
         print("Key-value interruption")
 
@@ -49,6 +49,13 @@ def test(model, test_images):
     pass
 
 if __name__ == '__main__':
+    T_C, T_D, T = 1000, 600, 3600
+    train_images, _ = get_data()
+    model = ImageInpaint()
+    compile_model(model)
+    train(model, train_images, 25, 2500, 1000, 2000)
+
+    '''
     args = parse_args()
     test_images = None
     if (args.task == 'train' or args.task == 'both'):
@@ -68,3 +75,4 @@ if __name__ == '__main__':
             
             model = load_model(args.checkpoint_path)
             test(model, test_images)
+    '''

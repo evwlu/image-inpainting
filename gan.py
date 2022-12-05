@@ -2,26 +2,26 @@ import tensorflow as tf
 
 class LocalDiscriminator(tf.keras.layers.Layer):
     def __init__(self, shape=(32,32,3), **kwargs):
-        super.__init__(kwargs)
+        super(LocalDiscriminator, self).__init__(**kwargs)
         # initialize layers
         # note: the shape for cifar-100 is (32,32,3); leave this parameter if changing the training data
-        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME', input_shape=shape)
+        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME')
         self.bnorm1 = tf.keras.layers.BatchNormalization()
         self.relu1 = tf.keras.layers.ReLU()
 
-        # 16 x 16
+        # input: 16 x 16
         self.conv2 = tf.keras.layers.Conv2D(4, 5, strides=2, padding='SAME')
         self.bnorm2 = tf.keras.layers.BatchNormalization()
         self.relu2 = tf.keras.layers.ReLU()
 
-        # 8 x 8
+        # input: 8 x 8
         self.conv3 = tf.keras.layers.Conv2D(8, 5, strides=2, padding='SAME')
         self.bnorm3 = tf.keras.layers.BatchNormalization()
         self.relu3 = tf.keras.layers.ReLU()
 
-        # 4 x 4
+        # input: 4 x 4
         self.flatten = tf.keras.layers.Flatten()
-        self.linear = tf.keras.layers.Dense(1024, activation='relu')
+        self.linear = tf.keras.layers.Dense(units=1024)
 
     def call(self, window, training=False):
         """
@@ -45,9 +45,9 @@ class LocalDiscriminator(tf.keras.layers.Layer):
 
 class GlobalDiscriminator(tf.keras.layers.Layer):
     def __init__(self, shape=(32,32,3), **kwargs):
-        super.__init__(kwargs)
+        super(GlobalDiscriminator, self).__init__(**kwargs)
 
-        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME', input_shape=shape)
+        self.conv1 = tf.keras.layers.Conv2D(2, 5, strides=2, padding='SAME')
         self.bnorm1 = tf.keras.layers.BatchNormalization()
         self.relu1 = tf.keras.layers.ReLU()
 
@@ -68,7 +68,7 @@ class GlobalDiscriminator(tf.keras.layers.Layer):
 
         # 2 x 2
         self.flatten = tf.keras.layers.Flatten()
-        self.linear = tf.keras.layers.Dense(1024, activation='relu')
+        self.linear = tf.keras.layers.Dense(units=1024)
 
     def call(self, full_image, training=False):
         """

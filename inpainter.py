@@ -7,15 +7,16 @@ from utils.masks import initialize_masks
 
 def get_mini_batch(images, batch_size):
     batch = []
-    indices = {}
+    indices = set()
 
+    # collects a batch of unique indices from images (the entire training dataset)
     while (len(indices) < batch_size):
         indices.add(random.randint(0, len(images)-1))
     
     for idx in indices:
         batch.append(images[idx])
     
-    return tf.concat(batch, 0)
+    return tf.convert_to_tensor(batch)
 
 def get_windows(images, masks, locations):
     output = []
@@ -33,7 +34,7 @@ class ImageInpaint(tf.keras.Model):
         completion network, local discriminator, global discriminator, and fully connected layer
         that makes a prediction after concatenating the local + global disc output
         """
-        super.__init__(kwargs)
+        super().__init__(kwargs)
         self.completion = CompletionNetwork(shape=shape)
 
         self.local_disc = LocalDiscriminator()
@@ -72,13 +73,13 @@ class ImageInpaint(tf.keras.Model):
             batch = get_mini_batch(images, batch_size)
 
             M_C, locations_C = initialize_masks(batch_size, images.shape[1], int(images.shape[1]/2), int(images.shape[1]/2), int(images.shape[1]/2))
-
             if (i < T_C):
+                
                 with tf.GradientTape() as tape:
-                    incomplete_images = batch * (1 - M_C)
+                    incomplete_images = tf.cast(batch * (1 - M_C), dtype=tf.float32)
                     completed_images = self.completion(incomplete_images, training=True)
 
-                    comp_loss = self.comp_loss(batch, completed_images)
+                    comp_loss = self.comp_loss(tf.cast(batch, dtype=tf.float64), tf.cast(completed_images, dtype=tf.float64))
                 
                     self.update_variables(tape, self.completion, comp_loss)
 
@@ -88,6 +89,7 @@ class ImageInpaint(tf.keras.Model):
                 print(f"\r[Training {i}/{T_C}]\t completion loss={avg_loss:.3f}", end='')
 
             else:
+
                 fake_windows = get_windows(batch, M_C, locations_C)
                 fake_images = None # note: run completion network in the scope of the tape
 
