@@ -7,7 +7,7 @@ def completion_loss(true_image, completed_image):
     return mean
 
 def discriminator_loss(real_pred, fake_pred):
-    bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    bce = tf.keras.losses.BinaryCrossentropy()
 
     real_loss = bce(tf.ones(real_pred.shape), real_pred)
     fake_loss = bce(tf.zeros(fake_pred.shape), fake_pred)

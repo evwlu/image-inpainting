@@ -1,5 +1,6 @@
 import argparse
 import tensorflow as tf
+import numpy as np
 from inpainter import ImageInpaint
 
 def parse_args():
@@ -39,9 +40,13 @@ def train(model, train_images, batch_size, T_C, T_D, T):
 
     # note: apply data augmentation before training
     try:
-        model.train(train_images, batch_size, T_C, T_D, T)
+        augment_fn = tf.keras.Sequential([
+            tf.keras.layers.RandomFlip("horizontal_and_vertical"),
+            tf.keras.layers.RandomContrast(0.10)
+        ])
+        model.train(train_images, batch_size, T_C, T_D, T, augment_fn)
     except KeyboardInterrupt as e:
-        print("Key-value interruption")
+        print("\nKey-value interruption")
 
 def test(model, test_images):
 
@@ -49,17 +54,21 @@ def test(model, test_images):
     pass
 
 if __name__ == '__main__':
+
+    # for now you can just run train.py w/o proving any command line arguments
     T_C, T_D, T = 1000, 600, 3600
     train_images, _ = get_data()
+    np.random.shuffle(train_images)
     model = ImageInpaint()
     compile_model(model)
-    train(model, train_images, 25, 2500, 1000, 2000)
+    train(model, train_images, 25, 5, 5, 2000)
 
     '''
     args = parse_args()
     test_images = None
     if (args.task == 'train' or args.task == 'both'):
         train_images, test_images = get_data()
+        np.random.shuffle(train_images)
         model = ImageInpaint()
         
         compile_model(model)
