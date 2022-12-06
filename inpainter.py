@@ -3,6 +3,7 @@ import numpy as np
 from completion_net import CompletionNetwork
 from gan import LocalDiscriminator, GlobalDiscriminator
 import random
+import os
 from utils.masks import initialize_masks
 
 def get_mini_batch(images, batch_size):
@@ -62,19 +63,28 @@ class ImageInpaint(tf.keras.Model):
     def call(self, incomplete_images):
         return self.completion(incomplete_images)
 
-    def train(self, images, batch_size, T_C, T_D, T, augment_fn):
+    def train(self, images, batch_size, T_C, T_D, T, augment_fn, restore=False):
         """
         M_D represents masks used for training the discriminators on real inputs; M_C is the 
         masks used for training it on fake inputs; epoch is the current epoch number (recall that training
         is split up into three phases depending on the epoch number)
         """
-        
+        checkpoint_dir = './training_checkpoints'
+        checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+        checkpoint = tf.train.Checkpoint(model=self)
+
         total_comp_loss, total_disc_loss, total_joint_loss = 0, 0, 0
         total_seen = 0
 
         # note: training is split up into three phases: training completion using 
         # reconstruction (phase 1), training discriminator (phase 2), training completion using joint loss (phase 3)
         for i in range(T):
+            if (i == 0 and restore):
+                checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+        
+            if ((i + 1) % 100 == 0):
+                checkpoint.save(file_prefix=checkpoint_prefix)
+
             total_seen += 1
             batch = get_mini_batch(images, batch_size)
             batch = augment_fn(batch)

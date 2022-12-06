@@ -35,6 +35,8 @@ def load_model(checkpoint):
     model.test    = partial(ImageInpaint.test,    model)
     model.train   = partial(ImageInpaint.train,   model)
     model.compile = partial(ImageInpaint.compile, model)
+    
+    return model
 
 def train(model, train_images, batch_size, T_C, T_D, T):
 
@@ -57,7 +59,7 @@ if __name__ == '__main__':
 
     # for now you can just run train.py w/o proving any command line arguments
     batch_size = 25
-    T_C, T_D, T = 10, 10, 25
+    T_C, T_D, T = 1800, 200, 12000
 
     args = parse_args()
     test_images = None
