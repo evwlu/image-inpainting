@@ -15,8 +15,10 @@ def discriminator_loss(real_pred, fake_pred):
     # note: make sure to use tf.add instead of '+'!
     return tf.add(real_loss, fake_loss)
 
-def joint_loss(true_image, completed_image, real_pred, fake_pred, alpha=0.0004):
+def joint_loss(true_image, completed_image, fake_pred, alpha=0.0004):
     gen_loss = completion_loss(true_image, completed_image)
-    disc_loss = alpha * (discriminator_loss(real_pred, fake_pred))
+
+    bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    disc_loss = alpha * bce(tf.ones(fake_pred.shape), fake_pred)
 
     return gen_loss + disc_loss

@@ -43,6 +43,9 @@ class ImageInpaint(tf.keras.Model):
         self.concat = tf.keras.layers.Concatenate()
         self.fc = tf.keras.layers.Dense(units=1, activation='sigmoid')
     
+    def build(self, input_shape):
+        super().build(input_shape)
+    
     def compile(self, optimizer, losses, metrics):
         """
         initialize optimizer (Adam), initialize loss functions for completion network (l2 loss),
@@ -55,6 +58,9 @@ class ImageInpaint(tf.keras.Model):
         self.joint_loss = losses[2]
 
         self.acc = metrics[0]
+    
+    def call(self, incomplete_images):
+        return self.completion(incomplete_images)
 
     def train(self, images, batch_size, T_C, T_D, T, augment_fn):
         """
@@ -122,7 +128,7 @@ class ImageInpaint(tf.keras.Model):
                         incomplete_images = tf.cast(batch * (1 - M_C), dtype=tf.float64)
                         completed_images = tf.cast(self.completion(incomplete_images, training=True), dtype=tf.float64)
 
-                        joint_loss = self.joint_loss(tf.cast(batch, dtype=tf.float64), completed_images, tf.cast(real_pred, dtype=tf.float64), tf.cast(fake_pred, dtype=tf.float64), 0.0004)
+                        joint_loss = self.joint_loss(tf.cast(batch, dtype=tf.float64), completed_images, tf.cast(fake_pred, dtype=tf.float64), 0.0004)
 
                 self.update_variables(tape, self.fc, disc_loss)
                 self.update_variables(tape, self.concat, disc_loss)

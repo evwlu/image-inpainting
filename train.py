@@ -56,32 +56,32 @@ def test(model, test_images):
 if __name__ == '__main__':
 
     # for now you can just run train.py w/o proving any command line arguments
-    T_C, T_D, T = 1000, 600, 3600
-    train_images, _ = get_data()
-    np.random.shuffle(train_images)
-    model = ImageInpaint()
-    compile_model(model)
-    train(model, train_images, 25, 5, 5, 2000)
+    batch_size = 25
+    T_C, T_D, T = 10, 10, 25
 
-    '''
     args = parse_args()
     test_images = None
+
+    # for training, add `--task train --checkpoint_path ./model`
     if (args.task == 'train' or args.task == 'both'):
         train_images, test_images = get_data()
         np.random.shuffle(train_images)
         model = ImageInpaint()
         
         compile_model(model)
-        train(model, train_images)
+        train(model, train_images, batch_size, T_C, T_D, T)
 
+        # note: need to fix this!
         if (args.checkpoint_path):
+            model(tf.random.normal((1,32,32,3)))
             tf.keras.models.save_model(model, args.checkpoint_path)
     
     if (args.task == 'test' or args.task == 'both'):
         if (args.checkpoint_path):
             if (test_images == None):
                 _, test_images = get_data()
-            
+
             model = load_model(args.checkpoint_path)
             test(model, test_images)
-    '''
+        else:
+            print("ERROR: Need to provide checkpoint path!")
