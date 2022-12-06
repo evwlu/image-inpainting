@@ -2,6 +2,8 @@ import argparse
 import tensorflow as tf
 import numpy as np
 from inpainter import ImageInpaint
+from completion_net import CompletionNetwork
+from gan import LocalDiscriminator, GlobalDiscriminator
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Arg Parser", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -29,16 +31,22 @@ def compile_model(model):
     )
 
 def load_model(checkpoint):
-    model = tf.keras.models.load_model(checkpoint)
+    model = tf.keras.models.load_model(checkpoint, 
+        custom_objects = dict(
+            CompletionNetwork = CompletionNetwork,
+            LocalDiscriminator = LocalDiscriminator,
+            GlobalDiscriminator = GlobalDiscriminator
+        ))
 
     from functools import partial
     model.test    = partial(ImageInpaint.test,    model)
     model.train   = partial(ImageInpaint.train,   model)
     model.compile = partial(ImageInpaint.compile, model)
+    model.update_variables = partial(ImageInpaint.update_variables, model)
     
     return model
 
-def train(model, train_images, batch_size, T_C, T_D, T):
+def train(model, train_images, batch_size, T_C, T_D, T, restore):
 
     # note: apply data augmentation before training
     try:
@@ -46,7 +54,7 @@ def train(model, train_images, batch_size, T_C, T_D, T):
             tf.keras.layers.RandomFlip("horizontal_and_vertical"),
             tf.keras.layers.RandomContrast(0.10)
         ])
-        model.train(train_images, batch_size, T_C, T_D, T, augment_fn)
+        model.train(train_images, batch_size, T_C, T_D, T, augment_fn, restore=restore)
     except KeyboardInterrupt as e:
         print("\nKey-value interruption")
 
@@ -60,6 +68,7 @@ if __name__ == '__main__':
     # for now you can just run train.py w/o proving any command line arguments
     batch_size = 25
     T_C, T_D, T = 1800, 200, 12000
+    T_C, T_D, T = 100, 20, 125
 
     args = parse_args()
     test_images = None
@@ -71,9 +80,8 @@ if __name__ == '__main__':
         model = ImageInpaint()
         
         compile_model(model)
-        train(model, train_images, batch_size, T_C, T_D, T)
-
-        # note: need to fix this!
+        train(model, train_images, batch_size, T_C, T_D, T, False)
+        
         if (args.checkpoint_path):
             model(tf.random.normal((1,32,32,3)))
             tf.keras.models.save_model(model, args.checkpoint_path)

@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-class CompletionNetwork(tf.keras.layers.Layer):
+class CompletionNetwork(tf.keras.Model):
     def __init__(self, shape=(32,32,3), **kwargs):
         super(CompletionNetwork, self).__init__(**kwargs)
 
@@ -62,7 +62,8 @@ class CompletionNetwork(tf.keras.layers.Layer):
 
         # 3 maps for each of the channels
         self.conv9 = tf.keras.layers.Conv2D(3, 3, strides=1, padding='SAME')
-
+    
+    @tf.function
     def call(self, incomplete_images, training=False):
         x = self.relu1(self.bnorm1(self.conv1(incomplete_images), training))
         x = self.relu2(self.bnorm2(self.conv2(x), training))

@@ -60,6 +60,7 @@ class ImageInpaint(tf.keras.Model):
 
         self.acc = metrics[0]
     
+    @tf.function
     def call(self, incomplete_images):
         return self.completion(incomplete_images)
 

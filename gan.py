@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-class LocalDiscriminator(tf.keras.layers.Layer):
+class LocalDiscriminator(tf.keras.Model):
     def __init__(self, shape=(32,32,3), **kwargs):
         super(LocalDiscriminator, self).__init__(**kwargs)
         # initialize layers
@@ -23,6 +23,7 @@ class LocalDiscriminator(tf.keras.layers.Layer):
         self.flatten = tf.keras.layers.Flatten()
         self.linear = tf.keras.layers.Dense(units=1024)
 
+    @tf.function
     def call(self, window, training=False):
         """
         takes as input a window (completed or ground truth);
@@ -43,7 +44,7 @@ class LocalDiscriminator(tf.keras.layers.Layer):
         x = self.flatten(x)
         return self.linear(x)
 
-class GlobalDiscriminator(tf.keras.layers.Layer):
+class GlobalDiscriminator(tf.keras.Model):
     def __init__(self, shape=(32,32,3), **kwargs):
         super(GlobalDiscriminator, self).__init__(**kwargs)
 
@@ -70,6 +71,7 @@ class GlobalDiscriminator(tf.keras.layers.Layer):
         self.flatten = tf.keras.layers.Flatten()
         self.linear = tf.keras.layers.Dense(units=1024)
 
+    @tf.function
     def call(self, full_image, training=False):
         """
         takes as input the entire image (completed or ground truth);
