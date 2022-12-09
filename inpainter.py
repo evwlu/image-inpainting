@@ -5,6 +5,7 @@ from gan import LocalDiscriminator, GlobalDiscriminator
 import random
 import os
 from utils.masks import initialize_masks
+from utils.metrics import dice_coefficient
 
 def get_mini_batch(images, batch_size):
     batch = []
@@ -166,6 +167,7 @@ class ImageInpaint(tf.keras.Model):
         (note: not concerned with the accuracy of the discriminator)
         """
         total_comp_loss = 0
+        total_accuracies = 0
 
         num_images = images.shape[0]
 
@@ -174,19 +176,23 @@ class ImageInpaint(tf.keras.Model):
         for i in range(num_images):
             image = images[i]
 
-            M_C, locations_C = initialize_masks(1, image.shape[1], int(image.shape[1]/2), int(image.shape[1]/2), int(image.shape[1]/2))
+            M_C, _ = initialize_masks(1, image.shape[1], int(image.shape[1]/2), int(image.shape[1]/2), int(image.shape[1]/2))
                 
 
             incomplete_images = tf.cast(image * (1 - M_C), dtype=tf.float64)
             completed_images = self.completion(incomplete_images, training=True)
 
             comp_loss = self.comp_loss(tf.cast(image, dtype=tf.float64), tf.cast(completed_images, dtype=tf.float64))
+            dice_coeff = dice_coefficient(tf.cast(image, dtype=tf.float64), tf.cast(completed_images, dtype=tf.float64))
 
             total_comp_loss += comp_loss
-            print(f"\r loop {i}/{num_images}", end='')
+            total_accuracies += dice_coeff
+
+            print(f"\r Testing {i + 1}/{num_images} // avg_loss: {total_comp_loss/(i+1)} dice_coeff (acc) : {total_accuracies/(i+1)}", end='')
         
         avg_loss = total_comp_loss / num_images
-        print(f"Average completion loss={avg_loss:.3f}", end='')
+        avg_acc = total_accuracies / num_images
+        print(f"Training Summary: average completion loss={avg_loss:.3f} // average accuracy = {avg_acc:.3f}", end='')
 
     def update_variables(self, tape, layer, loss):
         grads = tape.gradient(loss, layer.trainable_variables)
