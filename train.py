@@ -60,7 +60,7 @@ def train(model, train_images, batch_size, T_C, T_D, T, restore):
         print("\nKey-value interruption")
 
 def test(model, test_images):
-
+    model.test()
     # initialize stats, test the model, print out the stats at the end
     pass
 
