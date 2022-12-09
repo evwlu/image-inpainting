@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # for now you can just run train.py w/o proving any command line arguments
     batch_size = 25
     T_C, T_D, T = 1800, 200, 12000
-    T_C, T_D, T = 50, 20, 100
+    #T_C, T_D, T = 50, 20, 100
 
     args = parse_args()
     test_images = None
