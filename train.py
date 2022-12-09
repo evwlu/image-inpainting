@@ -36,7 +36,8 @@ def load_model(checkpoint):
             CompletionNetwork = CompletionNetwork,
             LocalDiscriminator = LocalDiscriminator,
             GlobalDiscriminator = GlobalDiscriminator
-        ))
+        ),
+        compile = False)
 
     from functools import partial
     model.test    = partial(ImageInpaint.test,    model)
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     # for now you can just run train.py w/o proving any command line arguments
     batch_size = 25
     T_C, T_D, T = 1800, 200, 12000
-    T_C, T_D, T = 100, 20, 125
+    T_C, T_D, T = 50, 20, 100
 
     args = parse_args()
     test_images = None
@@ -80,7 +81,7 @@ if __name__ == '__main__':
         model = ImageInpaint()
         
         compile_model(model)
-        train(model, train_images, batch_size, T_C, T_D, T, False)
+        train(model, train_images, batch_size, T_C, T_D, T, True)
         
         if (args.checkpoint_path):
             model(tf.random.normal((1,32,32,3)))
