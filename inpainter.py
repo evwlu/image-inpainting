@@ -192,7 +192,7 @@ class ImageInpaint(tf.keras.Model):
         
         avg_loss = total_comp_loss / num_images
         avg_acc = total_accuracies / num_images
-        print(f"Training Summary: average completion loss={avg_loss:.3f} // average accuracy = {avg_acc:.3f}", end='')
+        print(f"\nTraining Summary: average completion loss={avg_loss:.3f} // average accuracy = {avg_acc:.3f}", end='')
 
     def update_variables(self, tape, layer, loss):
         grads = tape.gradient(loss, layer.trainable_variables)
