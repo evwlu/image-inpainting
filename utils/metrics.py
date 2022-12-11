@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 def dice_coefficient(true_images, completed_image):
     '''
@@ -7,11 +8,19 @@ def dice_coefficient(true_images, completed_image):
     measures how many true positives are found, but also penalizes you for the
     number of false positives/negatives found (similar to precision). 
     '''
-    true_f = true_images.flatten()
-    complete_f = completed_image.flatten()
+    true_f = tf.image.resize(tf.expand_dims(true_images, axis=0), (8, 8))
+    complete_f = tf.image.resize(tf.expand_dims(completed_image[0], axis=0), (8, 8))
 
-    # We can use "*" here to compute intersection with 
-    intersection = np.sum(true_f * complete_f)
+    true_f = np.array(tf.reshape(true_f, [-1]))
+    complete_f = np.array(tf.reshape(complete_f, [-1]))
+
+    # Let 'moe' represent the margin of error in terms of distance of pixel value allowed
+    moe = 25
+    diff_f = true_f - complete_f
+    m1 = -moe < diff_f
+    m2 = diff_f < moe
+    intersection = np.sum(np.where((m1), true_f, 0))
+    intersection = np.sum(np.where((m2), true_f, 0))
     true_sum = np.sum(true_f)
     completed_sum = np.sum(complete_f)
 

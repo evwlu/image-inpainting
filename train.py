@@ -60,7 +60,7 @@ def train(model, train_images, batch_size, T_C, T_D, T, restore):
         print("\nKey-value interruption")
 
 def test(model, test_images):
-
+    model.test()
     # initialize stats, test the model, print out the stats at the end
     pass
 
@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
     # for now you can just run train.py w/o proving any command line arguments
     batch_size = 25
-    T_C, T_D, T = 1800, 200, 12000
-    T_C, T_D, T = 50, 20, 100
+    #T_C, T_D, T = 1800, 200, 12000
+    T_C, T_D, T = 1800, 200, 3000
 
     args = parse_args()
     test_images = None
